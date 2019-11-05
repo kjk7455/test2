@@ -11,8 +11,11 @@ tf.debugging.set_log_device_placement(True)
 
 learning_rate = 1e-5  # 학습 주기
 batch_size = 50  # 학습당 학습량
+test_size = 1
 num_epochs = 100
 data_read = data_read(batch_size)
+train_list = glob('E:\\LEGO\\train\\*\\*.png')
+test_list = glob('E:\\LEGO\\test\\*\\*.png')
 # convolutional network layer 1
 def conv1(input_data):
     # layer 1 (convolutional layer)
@@ -126,8 +129,8 @@ def build_model(images, keep_prob):
 X = tf.placeholder(tf.float32, shape=[None, 200, 200, 1])
 Y = tf.placeholder(tf.float32, shape=[None, 4])
 keep_prob = tf.placeholder(tf.float32)
-iterator = data_read.made_train_batch().make_initializable_iterator()
-test_iterator = data_read.made_train_batch().make_initializable_iterator()
+iterator = data_read.made_batch(train_list, batch_size).make_initializable_iterator()
+test_iterator = data_read.made_batch(test_list, test_size).make_initializable_iterator()
 
 prediction = build_model(X, keep_prob)
 # define loss function
@@ -155,7 +158,7 @@ with tf.Session() as sess:
         avg_cost = 0
         for x in range(int(data_read.data_size/batch_size)):
             x_data, y_data = sess.run(train_next)
-            cost_val, _ = sess.run([cost, train], feed_dict={X: x_data, Y: y_data, keep_prob: 0.8})
+            cost_val, _ = sess.run([cost, train], feed_dict={X: x_data, Y: y_data, keep_prob: 0.7})
             avg_cost += cost_val / int(data_read.data_size/batch_size)
             print(x)
             if(x%4 == 0 ):

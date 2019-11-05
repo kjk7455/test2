@@ -6,8 +6,6 @@ from PIL import Image
 
 class data_read:
     def __init__(self, batch_size):
-        self.train_list = glob('E:\\LEGO\\train\\*\\*.png')
-        self.test_list = glob('E:\\LEGO\\test\\*\\*.png')
         self.data_size = len(self.train_list)
         self.batch_size = batch_size
 
@@ -38,46 +36,27 @@ class data_read:
         #self.image = tf.image.random_crop(self.image, [100, 100, 1])
         return self.image, label
 
-    def made_train_batch(self):
+    def made_batch(self, link, size):
         self.label_name_list = []
-        for path in self.train_list:
+        for path in link:
             self.label_name_list.append(self.get_label_from_path(path))
 
         self.unique_label_names = np.unique(self.label_name_list)
 
-        # label을 array 통채로 넣는게 아니고, list 화 시켜서 하나씩 넣기 위해 list로 바꿔주었다.
-        self.label_list = [self.onehot_encode_label(path, self.unique_label_names).tolist() for path in self.train_list]
+        self.label_list = [self.onehot_encode_label(path, self.unique_label_names).tolist() for path in link]
 
-        self.dataset = tf.data.Dataset.from_tensor_slices((self.train_list, self.label_list))
+        self.dataset = tf.data.Dataset.from_tensor_slices((link, self.label_list))
         self.dataset = self.dataset.map(
             lambda data_list, label_list: tuple(
                 tf.py_func(self._read_py_function, [data_list, label_list], [tf.int32, tf.uint8])))
 
         self.dataset = self.dataset.map(self._random_function)
         self.dataset = self.dataset.repeat()
-        self.dataset = self.dataset.shuffle(buffer_size=(int(len(self.train_list) * 0.4) + 3 * self.batch_size))
-        self.dataset = self.dataset.batch(self.batch_size)
+        self.dataset = self.dataset.shuffle(buffer_size=(int(len(link) * 0.4) + 3 * self.batch_size))
+        self.dataset = self.dataset.batch(size)
 
         return self.dataset
 
-
-    def made_test_batch(self):
-        self.label_name_list = []
-        for path in self.test_list:
-            self.label_name_list.append(self.get_label_from_path(path))
-
-        self.unique_label_names = np.unique(self.label_name_list)
-
-        # label을 array 통채로 넣는게 아니고, list 화 시켜서 하나씩 넣기 위해 list로 바꿔주었다.
-        self.label_list = [self.onehot_encode_label(path, self.unique_label_names).tolist() for path in self.test_list]
-
-        self.dataset = tf.data.Dataset.from_tensor_slices((self.test_list, self.label_list))
-        self.dataset = self.dataset.map(
-            lambda data_list, label_list: tuple(
-                tf.py_func(self._read_py_function, [data_list, label_list], [tf.int32, tf.uint8])))
-
-        self.dataset = self.dataset.repeat()
-        self.dataset = self.dataset.shuffle(buffer_size=(int(len(self.test_list) * 0.4) + 3 * 1))
-        self.dataset = self.dataset.batch(1)
-
-        return self.dataset
+if __name__ == '__main__':
+  made_batch(
+  train_list = glob('E:\\LEGO\\train\\*\\*.png'), 2)

@@ -58,5 +58,4 @@ class data_read:
         return self.dataset
 
 if __name__ == '__main__':
-  made_batch(
-  train_list = glob('E:\\LEGO\\train\\*\\*.png'), 2)
+  made_batch('E:\\LEGO\\train\\*\\*.png', 2)
